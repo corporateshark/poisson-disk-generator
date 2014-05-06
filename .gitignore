@@ -19,3 +19,13 @@
 *.exe
 *.out
 *.app
+
+# VisualStudio files
+*.suo
+*.user
+*.sdf
+*.opensdf
+
+Debug/
+Release/
+ipch/
