@@ -107,15 +107,8 @@ struct sGrid
 	}
 	void Insert( const sPoint& P )
 	{
-		Insert( ImageToGrid( P, m_CellSize ), P );
-	}
-	void Insert( const sGridPoint& G, const sPoint& P )
-	{
-		Insert( G.x, G.y, P );
-	}
-	void Insert( int x, int y, const sPoint& P )
-	{
-		m_Grid[x][y] = P;
+		sGridPoint G = ImageToGrid( P, m_CellSize );
+		m_Grid[G.x][G.y] = P;
 	}
 	bool IsInNeighbourhood( sPoint Point, float MinDist, float CellSize )
 	{
@@ -178,7 +171,7 @@ sPoint GenerateRandomPointAround( const sPoint& P, float MinDist )
 	return sPoint( X, Y );
 }
 
-std::vector<sPoint> GeneratePoissonPoints( float MinDist, int new_points_count, size_t NumPoints )
+std::vector<sPoint> GeneratePoissonPoints( float MinDist, int NewPointsCount, size_t NumPoints )
 {
 	std::vector<sPoint> SamplePoints;
 	std::vector<sPoint> ProcessList;
@@ -191,12 +184,12 @@ std::vector<sPoint> GeneratePoissonPoints( float MinDist, int new_points_count, 
 
 	sGrid Grid( GridW, GridH, CellSize );
 
-	sPoint firstPoint = sPoint( RandomFloat(), RandomFloat() );
+	sPoint FirstPoint = sPoint( RandomFloat(), RandomFloat() );
 
 	// update containers
-	ProcessList.push_back( firstPoint );
-	SamplePoints.push_back( firstPoint );
-	Grid.Insert( firstPoint );
+	ProcessList.push_back( FirstPoint );
+	SamplePoints.push_back( FirstPoint );
+	Grid.Insert( FirstPoint );
 
 	// generate new points for each point in the queue
 	while ( !ProcessList.empty() && SamplePoints.size() < NumPoints )
@@ -206,7 +199,7 @@ std::vector<sPoint> GeneratePoissonPoints( float MinDist, int new_points_count, 
 
 		sPoint Point = PopRandom( ProcessList );
 
-		for ( int i = 0; i < new_points_count; i++ )
+		for ( int i = 0; i < NewPointsCount; i++ )
 		{
 			sPoint NewPoint = GenerateRandomPointAround( Point, MinDist );
 
