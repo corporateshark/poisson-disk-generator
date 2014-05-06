@@ -166,7 +166,7 @@ sPoint GenerateRandomPointAround( const sPoint& P, float MinDist )
 	float R2 = RandomFloat();
 
 	// radius should be between MinDist and 2 * MinDist
-	float Radius = MinDist * ( R1 + 1.0 );
+	float Radius = MinDist * ( R1 + 1.0f );
 
 	// random angle
 	float Angle = 2 * 3.141592653589f * R2;
