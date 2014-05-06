@@ -2,10 +2,10 @@
  * \file Poisson.cpp
  * \brief
  *
- * Poisson disk points generator
+ * Poisson Disk Points Generator
  *
- * \version 1.0
- * \date 06/05/2014
+ * \version 1.1.0
+ * \date 07/05/2014
  * \author Sergey Kosarevsky, 2014
  * \author support@linderdaum.com http://www.linderdaum.com
  */
@@ -36,13 +36,15 @@ const int   k           = 30;		// refer to bridson-siggraph07-poissondisk.pdf fo
 
 ////////////////////////////////////////////////////////////////////////////
 
-const char* Version = "1.0 (06/05/2014)";
+const char* Version = "1.1.0 (07/05/2014)";
 
 const float MinDistance = sqrt( float(NumPoints) ) / float(NumPoints);
 
 std::random_device rd;
 std::mt19937 gen( rd() );
 std::uniform_real_distribution<> dis( 0.0, 1.0 );
+
+float* g_DensityMap = NULL;
 
 struct sPoint
 {
@@ -281,6 +283,55 @@ void SaveBMP( const char* FileName, const void* RawBGRImage, int Width, int Heig
 	std::cout << "Saved " << FileName << std::endl;
 }
 
+unsigned char* LoadBMP( const char* FileName, int* OutWidth, int* OutHeight )
+{
+	sBMPHeader Header;
+
+	std::ifstream File( FileName, std::ifstream::binary );
+
+	File.read( (char*)&Header, sizeof( Header ) );
+
+	*OutWidth  = Header.biWidth;
+	*OutHeight = Header.biHeight;
+
+	size_t DataSize = 3 * Header.biWidth * Header.biHeight;
+
+	unsigned char* Img = new unsigned char[ DataSize ];
+
+	File.read( (char*)Img, DataSize );
+
+	return Img;
+}
+
+void LoadDensityMap( const char* FileName )
+{
+	std::cout << "Loading density map " << FileName << std::endl;
+
+	int W, H;
+	unsigned char* Data = LoadBMP( FileName, &W, &H );
+
+	std::cout << "Loaded ( " << W << " x " << H << " ) " << std::endl;
+
+	if ( W != ImageSize || H != ImageSize )
+	{
+		std::cout << "ERROR: density map should be " << ImageSize << " x " << ImageSize << std::endl;		
+
+		exit( 255 );
+	}
+
+	g_DensityMap = new float[ W * H ];
+
+	for ( int y = 0; y != H; y++ )
+	{
+		for ( int x = 0; x != W; x++ )
+		{
+			g_DensityMap[ x + y * W ] = float( Data[ 3 * (x + y * W) ] ) / 255.0f;
+		}
+	}
+
+	delete[]( Data );
+}
+
 void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
@@ -288,16 +339,23 @@ void PrintBanner()
 	std::cout << "Sergey Kosarevsky, 2014" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com" << std::endl;
 	std::cout << std::endl;
+	std::cout << "Usage: Poisson [density-map-rgb24.bmp]" << std::endl;
+	std::cout << std::endl;
 }
 
-int main()
+int main( int argc, char** argv )
 {
 	PrintBanner();
+
+	if ( argc > 1 )
+	{
+		LoadDensityMap( argv[1] );
+	}
 
 	std::vector<sPoint> Points = GeneratePoissonPoints( MinDistance, k, NumPoints );
 
 	// prepare BGR image
-	size_t DataSize = 3*ImageSize*ImageSize;
+	size_t DataSize = 3 * ImageSize * ImageSize;
 
 	unsigned char* Img = new unsigned char[ DataSize ];
 
@@ -307,13 +365,20 @@ int main()
 	{
 		int x = int( i->x * ImageSize );
 		int y = int( i->y * ImageSize );
+		if ( g_DensityMap )
+		{
+			// dice
+			float R = RandomFloat();
+			float P = g_DensityMap[ x + y * ImageSize ];
+			if ( R > P ) continue;
+		}
 		int Base = 3 * (x + y * ImageSize);
 		Img[ Base+0 ] = Img[ Base+1 ] = Img[ Base+2 ] = 255;
 	}
 
 	SaveBMP( "Poisson.bmp", Img, ImageSize, ImageSize );
 
-	delete[] Img;
+	delete[]( Img );
 
 	return 0;
 }
