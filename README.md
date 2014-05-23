@@ -5,6 +5,7 @@
 support@linderdaum.com
 
 http://www.linderdaum.com
+http://blog.linderdaum.com
 
 =============================
 

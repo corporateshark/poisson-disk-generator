@@ -4,10 +4,10 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.0
- * \date 07/05/2014
+ * \version 1.1.1
+ * \date 23/05/2014
  * \author Sergey Kosarevsky, 2014
- * \author support@linderdaum.com http://www.linderdaum.com
+ * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
 /*
@@ -24,6 +24,7 @@
 #include <vector>
 #include <random>
 #include <stdint.h>
+#include <time.h>
 #include <fstream>
 #include <memory.h>
 
@@ -36,7 +37,7 @@ const int   k           = 30;		// refer to bridson-siggraph07-poissondisk.pdf fo
 
 ////////////////////////////////////////////////////////////////////////////
 
-const char* Version = "1.1.0 (07/05/2014)";
+const char* Version = "1.1.1 (23/05/2014)";
 
 const float MinDistance = sqrt( float(NumPoints) ) / float(NumPoints);
 
@@ -48,15 +49,19 @@ float* g_DensityMap = NULL;
 
 struct sPoint
 {
-	sPoint(): Valid( false ) {}
+	sPoint()
+		: x( 0 )
+		, y( 0 )
+		, m_Valid( false )
+	{}
 	sPoint( float X, float Y )
 		: x( X )
 		, y( Y )
-		, Valid( true )
+		, m_Valid( true )
 	{}
 	float x;
 	float y;
-	bool Valid;
+	bool m_Valid;
 	//
 	bool IsInRectangle() const
 	{
@@ -110,14 +115,14 @@ struct sGrid
 	void Insert( const sPoint& P )
 	{
 		sGridPoint G = ImageToGrid( P, m_CellSize );
-		m_Grid[G.x][G.y] = P;
+		m_Grid[ G.x ][ G.y ] = P;
 	}
 	bool IsInNeighbourhood( sPoint Point, float MinDist, float CellSize )
 	{
 		sGridPoint G = ImageToGrid( Point, CellSize );
 
 		// number of adjucent cells to look for neighbour points
-		int D = 5;
+		const int D = 5;
 
 		// scan the neighbourhood of the point in the grid
 		for ( int i = G.x - D; i < G.x + D; i++ )
@@ -126,9 +131,9 @@ struct sGrid
 			{
 				if ( i >= 0 && i < m_W && j >= 0 && j < m_H )
 				{
-					sPoint P = m_Grid[i][j];
+					sPoint P = m_Grid[ i ][ j ];
 
-					if ( P.Valid && GetDistance( P, Point ) < MinDist ) { return true; }
+					if ( P.m_Valid && GetDistance( P, Point ) < MinDist ) { return true; }
 				}
 			}
 		}
@@ -337,7 +342,7 @@ void PrintBanner()
 	std::cout << "Poisson disk points generator" << std::endl;
 	std::cout << "Version " << Version << std::endl;
 	std::cout << "Sergey Kosarevsky, 2014" << std::endl;
-	std::cout << "support@linderdaum.com http://www.linderdaum.com" << std::endl;
+	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage: Poisson [density-map-rgb24.bmp]" << std::endl;
 	std::cout << std::endl;
@@ -351,6 +356,9 @@ int main( int argc, char** argv )
 	{
 		LoadDensityMap( argv[1] );
 	}
+
+	// prepare PRNG
+	gen.seed( time( NULL ) );
 
 	std::vector<sPoint> Points = GeneratePoissonPoints( MinDistance, k, NumPoints );
 
