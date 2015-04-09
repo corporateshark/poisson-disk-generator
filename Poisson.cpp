@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.1
- * \date 23/05/2014
- * \author Sergey Kosarevsky, 2014
+ * \version 1.1.2
+ * \date 09/04/2015
+ * \author Sergey Kosarevsky, 2014-2015
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -19,6 +19,13 @@
 // http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
 
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
+
+/* Versions history:
+ *		1.1.2		Apr  9, 2015		Output a text file with XY coordinates
+ *		1.1.1		May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
+ *    1.1		May  7, 2014		Support of density maps
+ *		1.0		May  6, 2014
+*/
 
 #include <iostream>
 #include <vector>
@@ -37,7 +44,7 @@ const int   k           = 30;		// refer to bridson-siggraph07-poissondisk.pdf fo
 
 ////////////////////////////////////////////////////////////////////////////
 
-const char* Version = "1.1.1 (23/05/2014)";
+const char* Version = "1.1.2 (09/04/2015)";
 
 const float MinDistance = sqrt( float(NumPoints) ) / float(NumPoints);
 
@@ -387,6 +394,16 @@ int main( int argc, char** argv )
 	SaveBMP( "Poisson.bmp", Img, ImageSize, ImageSize );
 
 	delete[]( Img );
+
+	// dump points to a text file
+	std::ofstream File( "Poisson.txt", std::ios::out );	
+
+	File << "NumPoints = " << Points.size() << std::endl;
+
+	for ( const auto& p : Points )
+	{
+		File << "X = " << p.x << "; Y = " << p.y << std::endl;
+	}
 
 	return 0;
 }
