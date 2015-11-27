@@ -198,8 +198,11 @@ std::vector<sPoint> GeneratePoissonPoints( float MinDist, int NewPointsCount, si
 
 	sGrid Grid( GridW, GridH, CellSize );
 
-	sPoint FirstPoint = sPoint( RandomFloat(), RandomFloat() );
-
+	sPoint FirstPoint;
+	do {
+	     FirstPoint = sPoint( RandomFloat(), RandomFloat() );	     
+	} while (!(Circle ? NewPoint.IsInCircle() : NewPoint.IsInRectangle()));
+	
 	// update containers
 	ProcessList.push_back( FirstPoint );
 	SamplePoints.push_back( FirstPoint );
@@ -208,25 +211,25 @@ std::vector<sPoint> GeneratePoissonPoints( float MinDist, int NewPointsCount, si
 	// generate new points for each point in the queue
 	while ( !ProcessList.empty() && SamplePoints.size() < NumPoints )
 	{
-		// a progress indicator, kind of
-		if ( SamplePoints.size() % 100 == 0 ) std::cout << ".";
+	     // a progress indicator, kind of
+	     if ( SamplePoints.size() % 100 == 0 ) std::cout << ".";
 
-		sPoint Point = PopRandom( ProcessList );
+	     sPoint Point = PopRandom( ProcessList );
 
-		for ( int i = 0; i < NewPointsCount; i++ )
-		{
-			sPoint NewPoint = GenerateRandomPointAround( Point, MinDist );
+	     for ( int i = 0; i < NewPointsCount; i++ )
+	     {
+		  sPoint NewPoint = GenerateRandomPointAround( Point, MinDist );
 
-			bool Fits = Circle ? NewPoint.IsInCircle() : NewPoint.IsInRectangle();
+		  bool Fits = Circle ? NewPoint.IsInCircle() : NewPoint.IsInRectangle();
 
-			if ( Fits && !Grid.IsInNeighbourhood( NewPoint, MinDist, CellSize ) )
-			{
-				ProcessList.push_back( NewPoint );
-				SamplePoints.push_back( NewPoint );
-				Grid.Insert( NewPoint );
-				continue;
-			}
-		}
+		  if ( Fits && !Grid.IsInNeighbourhood( NewPoint, MinDist, CellSize ) )
+		  {
+		       ProcessList.push_back( NewPoint );
+		       SamplePoints.push_back( NewPoint );
+		       Grid.Insert( NewPoint );
+		       continue;
+		  }
+	     }
 	}
 
 	std::cout << std::endl << std::endl;
