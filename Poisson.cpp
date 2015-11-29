@@ -198,7 +198,10 @@ std::vector<sPoint> GeneratePoissonPoints( float MinDist, int NewPointsCount, si
 
 	sGrid Grid( GridW, GridH, CellSize );
 
-	sPoint FirstPoint = sPoint( RandomFloat(), RandomFloat() );
+	sPoint FirstPoint;
+ 	do {
+		FirstPoint = sPoint( RandomFloat(), RandomFloat() );	     
+	} while (!(Circle ? FirstPoint.IsInCircle() : FirstPoint.IsInRectangle()));
 
 	// update containers
 	ProcessList.push_back( FirstPoint );
