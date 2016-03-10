@@ -1,6 +1,6 @@
 **Poisson Disk Points Generator**
 
-(C) Sergey Kosarevsky, 2014-2015
+(C) Sergey Kosarevsky, 2014-2016
 
 support@linderdaum.com
 
@@ -9,7 +9,7 @@ http://blog.linderdaum.com
 
 =============================
 
-Poisson disk points generator in C++ in a single file.
+Poisson disk points generator in a single file header-only C++11 library.
 
 =============================
 

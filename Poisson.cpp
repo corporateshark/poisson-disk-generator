@@ -2,11 +2,11 @@
  * \file Poisson.cpp
  * \brief
  *
- * Poisson Disk Points Generator
+ * Poisson Disk Points Generator example
  *
- * \version 1.1.2
- * \date 09/04/2015
- * \author Sergey Kosarevsky, 2014-2015
+ * \version 1.1.3
+ * \date 10/03/2016
+ * \author Sergey Kosarevsky, 2014-2016
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -15,227 +15,21 @@
 		gcc Poisson.cpp -std=c++11 -lstdc++
 */
 
-// Fast Poisson Disk Sampling in Arbitrary Dimensions
-// http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
-
-// Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
-
-/* Versions history:
- *		1.1.2		Apr  9, 2015		Output a text file with XY coordinates
- *		1.1.1		May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
- *    1.1		May  7, 2014		Support of density maps
- *		1.0		May  6, 2014
-*/
-
-#include <iostream>
 #include <vector>
-#include <random>
-#include <stdint.h>
-#include <time.h>
+#include <iostream>
 #include <fstream>
 #include <memory.h>
+
+#include "PoissonGenerator.h"
 
 ///////////////// User selectable parameters ///////////////////////////////
 
 const int   NumPoints   = 20000;	// minimal number of points to generate
-const bool  Circle      = true;	// 'true' to fill a circle, 'false' to fill a rectangle
 const int   ImageSize   = 1024;	// generate RGB image [ImageSize x ImageSize]
-const int   k           = 30;		// refer to bridson-siggraph07-poissondisk.pdf for details
 
 ////////////////////////////////////////////////////////////////////////////
 
-const char* Version = "1.1.2 (09/04/2015)";
-
-const float MinDistance = sqrt( float(NumPoints) ) / float(NumPoints);
-
-std::random_device rd;
-std::mt19937 gen( rd() );
-std::uniform_real_distribution<> dis( 0.0, 1.0 );
-
-float* g_DensityMap = NULL;
-
-struct sPoint
-{
-	sPoint()
-		: x( 0 )
-		, y( 0 )
-		, m_Valid( false )
-	{}
-	sPoint( float X, float Y )
-		: x( X )
-		, y( Y )
-		, m_Valid( true )
-	{}
-	float x;
-	float y;
-	bool m_Valid;
-	//
-	bool IsInRectangle() const
-	{
-		return x >= 0 && y >= 0 && x <= 1 && y <= 1;
-	}
-	//
-	bool IsInCircle() const
-	{
-		float fx = x - 0.5f;
-		float fy = y - 0.5f;
-		return ( fx*fx + fy*fy ) <= 0.25f;
-	}
-};
-
-struct sGridPoint
-{
-	sGridPoint( int X, int Y )
-		: x( X )
-		, y( Y )
-	{}
-	int x;
-	int y;
-};
-
-float RandomFloat()
-{
-	return static_cast<float>( dis( gen ) );
-}
-
-float GetDistance( const sPoint& P1, const sPoint& P2 )
-{
-	return sqrt( ( P1.x - P2.x ) * ( P1.x - P2.x ) + ( P1.y - P2.y ) * ( P1.y - P2.y ) );
-}
-
-sGridPoint ImageToGrid( const sPoint& P, float CellSize )
-{
-	return sGridPoint( ( int )( P.x / CellSize ), ( int )( P.y / CellSize ) );
-}
-
-struct sGrid
-{
-	sGrid( int W, int H, float CellSize )
-		: m_W( W )
-		, m_H( H )
-		, m_CellSize( CellSize )
-	{
-		m_Grid.resize( m_H );
-
-		for ( auto i = m_Grid.begin(); i != m_Grid.end(); i++ ) { i->resize( m_W ); }
-	}
-	void Insert( const sPoint& P )
-	{
-		sGridPoint G = ImageToGrid( P, m_CellSize );
-		m_Grid[ G.x ][ G.y ] = P;
-	}
-	bool IsInNeighbourhood( sPoint Point, float MinDist, float CellSize )
-	{
-		sGridPoint G = ImageToGrid( Point, CellSize );
-
-		// number of adjucent cells to look for neighbour points
-		const int D = 5;
-
-		// scan the neighbourhood of the point in the grid
-		for ( int i = G.x - D; i < G.x + D; i++ )
-		{
-			for ( int j = G.y - D; j < G.y + D; j++ )
-			{
-				if ( i >= 0 && i < m_W && j >= 0 && j < m_H )
-				{
-					sPoint P = m_Grid[ i ][ j ];
-
-					if ( P.m_Valid && GetDistance( P, Point ) < MinDist ) { return true; }
-				}
-			}
-		}
-
-
-		return false;
-	}
-
-private:
-	int m_W;
-	int m_H;
-	float m_CellSize;
-
-	std::vector< std::vector<sPoint> > m_Grid;
-};
-
-sPoint PopRandom( std::vector<sPoint>& Points )
-{
-	std::uniform_int_distribution<> dis( 0, Points.size() - 1 );
-	int Idx = dis( gen );
-	sPoint P = Points[ Idx ];
-	Points.erase( Points.begin() + Idx );
-	return P;
-}
-
-sPoint GenerateRandomPointAround( const sPoint& P, float MinDist )
-{
-	// start with non-uniform distribution
-	float R1 = RandomFloat();
-	float R2 = RandomFloat();
-
-	// radius should be between MinDist and 2 * MinDist
-	float Radius = MinDist * ( R1 + 1.0f );
-
-	// random angle
-	float Angle = 2 * 3.141592653589f * R2;
-
-	// the new point is generated around the point (x, y)
-	float X = P.x + Radius * cos( Angle );
-	float Y = P.y + Radius * sin( Angle );
-
-	return sPoint( X, Y );
-}
-
-std::vector<sPoint> GeneratePoissonPoints( float MinDist, int NewPointsCount, size_t NumPoints )
-{
-	std::vector<sPoint> SamplePoints;
-	std::vector<sPoint> ProcessList;
-
-	// create the grid
-	float CellSize = MinDist / sqrt( 2.0f );
-
-	int GridW = ( int )ceil( 1.0f / CellSize );
-	int GridH = ( int )ceil( 1.0f / CellSize );
-
-	sGrid Grid( GridW, GridH, CellSize );
-
-	sPoint FirstPoint;
- 	do {
-		FirstPoint = sPoint( RandomFloat(), RandomFloat() );	     
-	} while (!(Circle ? FirstPoint.IsInCircle() : FirstPoint.IsInRectangle()));
-
-	// update containers
-	ProcessList.push_back( FirstPoint );
-	SamplePoints.push_back( FirstPoint );
-	Grid.Insert( FirstPoint );
-
-	// generate new points for each point in the queue
-	while ( !ProcessList.empty() && SamplePoints.size() < NumPoints )
-	{
-		// a progress indicator, kind of
-		if ( SamplePoints.size() % 100 == 0 ) std::cout << ".";
-
-		sPoint Point = PopRandom( ProcessList );
-
-		for ( int i = 0; i < NewPointsCount; i++ )
-		{
-			sPoint NewPoint = GenerateRandomPointAround( Point, MinDist );
-
-			bool Fits = Circle ? NewPoint.IsInCircle() : NewPoint.IsInRectangle();
-
-			if ( Fits && !Grid.IsInNeighbourhood( NewPoint, MinDist, CellSize ) )
-			{
-				ProcessList.push_back( NewPoint );
-				SamplePoints.push_back( NewPoint );
-				Grid.Insert( NewPoint );
-				continue;
-			}
-		}
-	}
-
-	std::cout << std::endl << std::endl;
-
-	return SamplePoints;
-}
+float* g_DensityMap = nullptr;
 
 #if defined( __GNUC__ )
 #	define GCC_PACK(n) __attribute__((packed,aligned(n)))
@@ -350,8 +144,8 @@ void LoadDensityMap( const char* FileName )
 void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
-	std::cout << "Version " << Version << std::endl;
-	std::cout << "Sergey Kosarevsky, 2014" << std::endl;
+	std::cout << "Version " << PoissonGenerator::Version << std::endl;
+	std::cout << "Sergey Kosarevsky, 2014-2016" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage: Poisson [density-map-rgb24.bmp]" << std::endl;
@@ -367,10 +161,9 @@ int main( int argc, char** argv )
 		LoadDensityMap( argv[1] );
 	}
 
-	// prepare PRNG
-	gen.seed( time( NULL ) );
+	PoissonGenerator::DefaultPRNG PRNG;
 
-	std::vector<sPoint> Points = GeneratePoissonPoints( MinDistance, k, NumPoints );
+	const auto Points = PoissonGenerator::GeneratePoissonPoints( NumPoints, PRNG );
 
 	// prepare BGR image
 	size_t DataSize = 3 * ImageSize * ImageSize;
@@ -386,7 +179,7 @@ int main( int argc, char** argv )
 		if ( g_DensityMap )
 		{
 			// dice
-			float R = RandomFloat();
+			float R = PRNG.RandomFloat();
 			float P = g_DensityMap[ x + y * ImageSize ];
 			if ( R > P ) continue;
 		}
