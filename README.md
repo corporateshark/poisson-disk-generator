@@ -2,9 +2,10 @@
 
 (C) Sergey Kosarevsky, 2014-2016
 
-support@linderdaum.com
+@corporateshark sk@linderdaum.com
 
 http://www.linderdaum.com
+
 http://blog.linderdaum.com
 
 =============================
