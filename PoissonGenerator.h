@@ -23,7 +23,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
- *      1.1.3a      Jun 9, 2016         Update constructor for DefaultPRNG
+ 		1.1.3a		Jun  9, 201		Update constructor for DefaultPRNG
  *		1.1.3		Mar 10, 2016		Header-only library, no global mutable state
  *		1.1.2		Apr  9, 2015		Output a text file with XY coordinates
  *		1.1.1		May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
@@ -47,18 +47,18 @@ class DefaultPRNG
 {
 public:
 	DefaultPRNG()
-	: m_Gen(std::random_device()() )
+	: m_Gen( std::random_device()() )
 	, m_Dis( 0.0f, 1.0f )
 	{
 		// prepare PRNG
 		m_Gen.seed( time( nullptr ) );
 	}
 
-    DefaultPRNG( uint32_t seed )
-        : m_Gen(seed)
-        , m_Dis(0.0f, 1.0f)
-    {
-    }
+	DefaultPRNG( uint32_t seed )
+	: m_Gen(seed)
+	, m_Dis(0.0f, 1.0f)
+	{
+	}
 
 	float RandomFloat()
 	{
