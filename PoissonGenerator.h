@@ -54,7 +54,7 @@ public:
 		m_Gen.seed( time( nullptr ) );
 	}
 
-	DefaultPRNG( uint32_t seed )
+	explicit DefaultPRNG( uint32_t seed )
 	: m_Gen(seed)
 	, m_Dis(0.0f, 1.0f)
 	{
