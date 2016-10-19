@@ -20,6 +20,7 @@
 #include <fstream>
 #include <memory.h>
 
+#define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.h"
 
 ///////////////// User selectable parameters ///////////////////////////////

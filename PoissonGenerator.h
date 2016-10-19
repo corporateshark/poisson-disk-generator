@@ -1,11 +1,11 @@
 /**
- * \file Poisson.cpp
+ * \file PoissonGenerator.h
  * \brief
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.3
- * \date 10/03/2016
+ * \version 1.1.4
+ * \date 19/10/2016
  * \author Sergey Kosarevsky, 2014-2016
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -13,6 +13,9 @@
 /*
 	Usage example:
 
+		#define POISSON_PROGRESS_INDICATOR 1
+		#include "PoissonGenerator.h"
+		...
 		PoissonGenerator::DefaultPRNG PRNG;
 		const auto Points = PoissonGenerator::GeneratePoissonPoints( NumPoints, PRNG );
 */
@@ -23,7 +26,8 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
- 		1.1.3a		Jun  9, 2016		Update constructor for DefaultPRNG
+ *		1.1.4 	Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
+ *		1.1.3a	Jun  9, 2016		Update constructor for DefaultPRNG
  *		1.1.3		Mar 10, 2016		Header-only library, no global mutable state
  *		1.1.2		Apr  9, 2015		Output a text file with XY coordinates
  *		1.1.1		May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
@@ -36,12 +40,10 @@
 #include <stdint.h>
 #include <time.h>
 
-#define POISSON_PROGRESS_INDICATOR 1
-
 namespace PoissonGenerator
 {
 
-const char* Version = "1.1.3 (10/03/2016)";
+const char* Version = "1.1.4 (19/10/2016)";
 
 class DefaultPRNG
 {
