@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.1.3
- * \date 10/03/2016
- * \author Sergey Kosarevsky, 2014-2016
+ * \version 1.1.5
+ * \date 16/06/2019
+ * \author Sergey Kosarevsky, 2014-2019
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -164,7 +164,7 @@ int main( int argc, char** argv )
 
 	PoissonGenerator::DefaultPRNG PRNG;
 
-	const auto Points = PoissonGenerator::GeneratePoissonPoints( NumPoints, PRNG );
+	const auto Points = PoissonGenerator::generatePoissonPoints( NumPoints, PRNG );
 
 	// prepare BGR image
 	size_t DataSize = 3 * ImageSize * ImageSize;
@@ -180,7 +180,7 @@ int main( int argc, char** argv )
 		if ( g_DensityMap )
 		{
 			// dice
-			float R = PRNG.RandomFloat();
+			float R = PRNG.randomFloat();
 			float P = g_DensityMap[ x + y * ImageSize ];
 			if ( R > P ) continue;
 		}

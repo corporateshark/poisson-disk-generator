@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.4
- * \date 19/10/2016
- * \author Sergey Kosarevsky, 2014-2016
+ * \version 1.1.5
+ * \date 16/06/2019
+ * \author Sergey Kosarevsky, 2014-2019
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -26,6 +26,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+ *    1.1.5    Jun 16, 2019      In-class initializers, default ctors, naming, shorter code
  *		1.1.4 	Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
  *		1.1.3a	Jun  9, 2016		Update constructor for DefaultPRNG
  *		1.1.3		Mar 10, 2016		Header-only library, no global mutable state
@@ -43,166 +44,160 @@
 namespace PoissonGenerator
 {
 
-const char* Version = "1.1.4 (19/10/2016)";
+const char* Version = "1.1.5 (16/06/2019)";
 
 class DefaultPRNG
 {
 public:
 	DefaultPRNG()
-	: m_Gen( std::random_device()() )
-	, m_Dis( 0.0f, 1.0f )
+	: gen_( std::random_device()() )
+	, dis_( 0.0f, 1.0f )
 	{
 		// prepare PRNG
-		m_Gen.seed( time( nullptr ) );
+		gen_.seed( time( nullptr ) );
 	}
 
 	explicit DefaultPRNG( uint32_t seed )
-	: m_Gen( seed )
-	, m_Dis( 0.0f, 1.0f )
+	: gen_( seed )
+	, dis_( 0.0f, 1.0f )
 	{
 	}
 
-	float RandomFloat()
+	float randomFloat()
 	{
-		return static_cast<float>( m_Dis( m_Gen ) );
+		return static_cast<float>( dis_( gen_ ) );
 	}
 
-	int RandomInt( int Max )
+	int randomInt( int maxValue )
 	{
-		std::uniform_int_distribution<> DisInt( 0, Max );
-		return DisInt( m_Gen );
+		std::uniform_int_distribution<> disInt( 0, maxValue );
+		return disInt( gen_ );
 	}
 
 private:
-	std::mt19937 m_Gen;
-	std::uniform_real_distribution<float> m_Dis;
+	std::mt19937 gen_;
+	std::uniform_real_distribution<float> dis_;
 };
 
-struct sPoint
+struct Point
 {
-	sPoint()
-		: x( 0 )
-		, y( 0 )
-		, m_Valid( false )
+	Point() = default;
+	Point( float X, float Y )
+	: x( X )
+	, y( Y )
+	, valid_( true )
 	{}
-	sPoint( float X, float Y )
-		: x( X )
-		, y( Y )
-		, m_Valid( true )
-	{}
-	float x;
-	float y;
-	bool m_Valid;
+	float x = 0.0f;
+	float y = 0.0f;
+	bool valid_ = false;
 	//
-	bool IsInRectangle() const
+	bool isInRectangle() const
 	{
 		return x >= 0 && y >= 0 && x <= 1 && y <= 1;
 	}
 	//
-	bool IsInCircle() const
+	bool isInCircle() const
 	{
-		float fx = x - 0.5f;
-		float fy = y - 0.5f;
+		const float fx = x - 0.5f;
+		const float fy = y - 0.5f;
 		return ( fx*fx + fy*fy ) <= 0.25f;
 	}
 };
 
-struct sGridPoint
+struct GridPoint
 {
-	sGridPoint( int X, int Y )
-		: x( X )
-		, y( Y )
+	GridPoint() = delete;
+	GridPoint( int X, int Y )
+	: x( X )
+	, y( Y )
 	{}
 	int x;
 	int y;
 };
 
-float GetDistance( const sPoint& P1, const sPoint& P2 )
+float getDistance( const Point& P1, const Point& P2 )
 {
 	return sqrt( ( P1.x - P2.x ) * ( P1.x - P2.x ) + ( P1.y - P2.y ) * ( P1.y - P2.y ) );
 }
 
-sGridPoint ImageToGrid( const sPoint& P, float CellSize )
+GridPoint imageToGrid( const Point& P, float cellSize )
 {
-	return sGridPoint( ( int )( P.x / CellSize ), ( int )( P.y / CellSize ) );
+	return GridPoint( ( int )( P.x / cellSize ), ( int )( P.y / cellSize ) );
 }
 
-struct sGrid
+struct Grid
 {
-	sGrid( int W, int H, float CellSize )
-		: m_W( W )
-		, m_H( H )
-		, m_CellSize( CellSize )
+	Grid( int w, int h, float cellSize )
+	: w_( w )
+	, h_( h )
+	, cellSize_( cellSize )
 	{
-		m_Grid.resize( m_H );
-
-		for ( auto i = m_Grid.begin(); i != m_Grid.end(); i++ ) { i->resize( m_W ); }
+		grid_.resize( h_ );
+		for ( auto i = grid_.begin(); i != grid_.end(); i++ ) { i->resize( w ); }
 	}
-	void Insert( const sPoint& P )
+	void insert( const Point& p )
 	{
-		sGridPoint G = ImageToGrid( P, m_CellSize );
-		m_Grid[ G.x ][ G.y ] = P;
+		const GridPoint g = imageToGrid( p, cellSize_ );
+		grid_[ g.x ][ g.y ] = p;
 	}
-	bool IsInNeighbourhood( sPoint Point, float MinDist, float CellSize )
+	bool isInNeighbourhood( const Point& point, float minDist, float cellSize )
 	{
-		sGridPoint G = ImageToGrid( Point, CellSize );
+		GridPoint g = imageToGrid( point, cellSize );
 
 		// number of adjucent cells to look for neighbour points
 		const int D = 5;
 
 		// scan the neighbourhood of the point in the grid
-		for ( int i = G.x - D; i < G.x + D; i++ )
+		for ( int i = g.x - D; i < g.x + D; i++ )
 		{
-			for ( int j = G.y - D; j < G.y + D; j++ )
+			for ( int j = g.y - D; j < g.y + D; j++ )
 			{
-				if ( i >= 0 && i < m_W && j >= 0 && j < m_H )
+				if ( i >= 0 && i < w_ && j >= 0 && j < h_ )
 				{
-					sPoint P = m_Grid[ i ][ j ];
+					const Point P = grid_[ i ][ j ];
 
-					if ( P.m_Valid && GetDistance( P, Point ) < MinDist ) { return true; }
+					if ( P.valid_ && getDistance( P, point ) < minDist ) { return true; }
 				}
 			}
 		}
-
 
 		return false;
 	}
 
 private:
-	int m_W;
-	int m_H;
-	float m_CellSize;
-
-	std::vector< std::vector<sPoint> > m_Grid;
+	int w_;
+	int h_;
+	float cellSize_;
+	std::vector< std::vector<Point> > grid_;
 };
 
 template <typename PRNG>
-sPoint PopRandom( std::vector<sPoint>& Points, PRNG& Generator )
+Point popRandom( std::vector<Point>& points, PRNG& generator )
 {
-	const int Idx = Generator.RandomInt( Points.size()-1 );
-	const sPoint P = Points[ Idx ];
-	Points.erase( Points.begin() + Idx );
-	return P;
+	const int idx = generator.randomInt( points.size()-1 );
+	const Point p = points[ idx ];
+	points.erase( points.begin() + idx );
+	return p;
 }
 
 template <typename PRNG>
-sPoint GenerateRandomPointAround( const sPoint& P, float MinDist, PRNG& Generator )
+Point generateRandomPointAround( const Point& p, float minDist, PRNG& generator )
 {
 	// start with non-uniform distribution
-	float R1 = Generator.RandomFloat();
-	float R2 = Generator.RandomFloat();
+	const float R1 = generator.randomFloat();
+	const float R2 = generator.randomFloat();
 
 	// radius should be between MinDist and 2 * MinDist
-	float Radius = MinDist * ( R1 + 1.0f );
+	const float radius = minDist * ( R1 + 1.0f );
 
 	// random angle
-	float Angle = 2 * 3.141592653589f * R2;
+	const float angle = 2 * 3.141592653589f * R2;
 
 	// the new point is generated around the point (x, y)
-	float X = P.x + Radius * cos( Angle );
-	float Y = P.y + Radius * sin( Angle );
+	const float x = p.x + radius * cos( angle );
+	const float y = p.y + radius * sin( angle );
 
-	return sPoint( X, Y );
+	return Point( x, y );
 }
 
 /**
@@ -213,61 +208,60 @@ sPoint GenerateRandomPointAround( const sPoint& P, float MinDist, PRNG& Generato
 	MinDist - minimal distance estimator, use negative value for default
 **/
 template <typename PRNG = DefaultPRNG>
-std::vector<sPoint> GeneratePoissonPoints(
-	size_t NumPoints,
-	PRNG& Generator,
-	int NewPointsCount = 30,
-	bool Circle = true,
-	float MinDist = -1.0f
+std::vector<Point> generatePoissonPoints(
+	size_t numPoints,
+	PRNG& generator,
+	int newPointsCount = 30,
+	bool isCircle = true,
+	float minDist = -1.0f
 )
 {
-	if ( MinDist < 0.0f )
+	if ( minDist < 0.0f )
 	{
-		MinDist = sqrt( float(NumPoints) ) / float(NumPoints);
+		minDist = sqrt( float(numPoints) ) / float(numPoints);
 	}
 
-	std::vector<sPoint> SamplePoints;
-	std::vector<sPoint> ProcessList;
+	std::vector<Point> samplePoints;
+	std::vector<Point> processList;
 
 	// create the grid
-	float CellSize = MinDist / sqrt( 2.0f );
+	const float cellSize = minDist / sqrt( 2.0f );
 
-	int GridW = ( int )ceil( 1.0f / CellSize );
-	int GridH = ( int )ceil( 1.0f / CellSize );
+	const int gridW = ( int )ceil( 1.0f / cellSize );
+	const int gridH = ( int )ceil( 1.0f / cellSize );
 
-	sGrid Grid( GridW, GridH, CellSize );
+	Grid grid( gridW, gridH, cellSize );
 
-	sPoint FirstPoint;
+	Point firstPoint;
  	do {
-		FirstPoint = sPoint( Generator.RandomFloat(), Generator.RandomFloat() );	     
-	} while (!(Circle ? FirstPoint.IsInCircle() : FirstPoint.IsInRectangle()));
+		firstPoint = Point( generator.randomFloat(), generator.randomFloat() );	     
+	} while (!(isCircle ? firstPoint.isInCircle() : firstPoint.isInRectangle()));
 
 	// update containers
-	ProcessList.push_back( FirstPoint );
-	SamplePoints.push_back( FirstPoint );
-	Grid.Insert( FirstPoint );
+	processList.push_back( firstPoint );
+	samplePoints.push_back( firstPoint );
+	grid.insert( firstPoint );
 
 	// generate new points for each point in the queue
-	while ( !ProcessList.empty() && SamplePoints.size() < NumPoints )
+	while ( !processList.empty() && samplePoints.size() < numPoints )
 	{
 #if POISSON_PROGRESS_INDICATOR
 		// a progress indicator, kind of
-		if ( SamplePoints.size() % 100 == 0 ) std::cout << ".";
+		if ( samplePoints.size() % 100 == 0 ) std::cout << ".";
 #endif // POISSON_PROGRESS_INDICATOR
 
-		sPoint Point = PopRandom<PRNG>( ProcessList, Generator );
+		const Point point = popRandom<PRNG>( processList, generator );
 
-		for ( int i = 0; i < NewPointsCount; i++ )
+		for ( int i = 0; i < newPointsCount; i++ )
 		{
-			sPoint NewPoint = GenerateRandomPointAround( Point, MinDist, Generator );
+			const Point newPoint = generateRandomPointAround( point, minDist, generator );
+			const bool canFitPoint = isCircle ? newPoint.isInCircle() : newPoint.isInRectangle();
 
-			bool Fits = Circle ? NewPoint.IsInCircle() : NewPoint.IsInRectangle();
-
-			if ( Fits && !Grid.IsInNeighbourhood( NewPoint, MinDist, CellSize ) )
+			if ( canFitPoint && !grid.isInNeighbourhood( newPoint, minDist, cellSize ) )
 			{
-				ProcessList.push_back( NewPoint );
-				SamplePoints.push_back( NewPoint );
-				Grid.Insert( NewPoint );
+				processList.push_back( newPoint );
+				samplePoints.push_back( newPoint );
+				grid.insert( newPoint );
 				continue;
 			}
 		}
@@ -277,7 +271,7 @@ std::vector<sPoint> GeneratePoissonPoints(
 	std::cout << std::endl << std::endl;
 #endif // POISSON_PROGRESS_INDICATOR
 
-	return SamplePoints;
+	return samplePoints;
 }
 
 } // namespace PoissonGenerator
