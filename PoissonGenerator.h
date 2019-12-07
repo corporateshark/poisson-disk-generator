@@ -44,7 +44,7 @@
 namespace PoissonGenerator
 {
 
-const char* Version = "1.1.5 (16/06/2019)";
+const char* Version = "1.1.6 (07/12/2019)";
 
 class DefaultPRNG
 {

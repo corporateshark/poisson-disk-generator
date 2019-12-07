@@ -17,6 +17,9 @@ Poisson disk points generator in a single file header-only C++11 library.
 To compile:
 	*gcc Poisson.cpp -std=c++11 -lstdc++*
 
+CMake:
+	*cmake -G "Visual Studio 16 2019" -A x64*
+
 =============================
 
 Algorithm description can be found in "Fast Poisson Disk Sampling in Arbitrary Dimensions"
