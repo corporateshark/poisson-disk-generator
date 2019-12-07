@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.5
- * \date 16/06/2019
+ * \version 1.1.6
+ * \date 07/12/2019
  * \author Sergey Kosarevsky, 2014-2019
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -26,20 +26,20 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
- *    1.1.5    Jun 16, 2019      In-class initializers, default ctors, naming, shorter code
- *		1.1.4 	Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
- *		1.1.3a	Jun  9, 2016		Update constructor for DefaultPRNG
- *		1.1.3		Mar 10, 2016		Header-only library, no global mutable state
- *		1.1.2		Apr  9, 2015		Output a text file with XY coordinates
- *		1.1.1		May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
- *    1.1		May  7, 2014		Support of density maps
- *		1.0		May  6, 2014
+*		1.1.6   Dec  7, 2019		Removed duplicate seed initialization, fixed warnings
+ *		1.1.5   Jun 16, 2019		In-class initializers, default ctors, naming, shorter code
+ *		1.1.4   Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
+ *		1.1.3a  Jun  9, 2016		Update constructor for DefaultPRNG
+ *		1.1.3   Mar 10, 2016		Header-only library, no global mutable state
+ *		1.1.2   Apr  9, 2015		Output a text file with XY coordinates
+ *		1.1.1   May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
+ *		1.1     May  7, 2014		Support of density maps
+ *		1.0     May  6, 2014
 */
 
 #include <vector>
 #include <random>
 #include <stdint.h>
-#include <time.h>
 
 namespace PoissonGenerator
 {
@@ -49,19 +49,10 @@ const char* Version = "1.1.5 (16/06/2019)";
 class DefaultPRNG
 {
 public:
-	DefaultPRNG()
-	: gen_( std::random_device()() )
-	, dis_( 0.0f, 1.0f )
-	{
-		// prepare PRNG
-		gen_.seed( time( nullptr ) );
-	}
-
+	DefaultPRNG() = default;
 	explicit DefaultPRNG( uint32_t seed )
 	: gen_( seed )
-	, dis_( 0.0f, 1.0f )
-	{
-	}
+	{}
 
 	float randomFloat()
 	{
@@ -75,8 +66,8 @@ public:
 	}
 
 private:
-	std::mt19937 gen_;
-	std::uniform_real_distribution<float> dis_;
+	std::mt19937 gen_ = std::mt19937( std::random_device()() );
+	std::uniform_real_distribution<float> dis_ = std::uniform_real_distribution<float>( 0.0f, 1.0f );
 };
 
 struct Point
@@ -142,7 +133,7 @@ struct Grid
 	}
 	bool isInNeighbourhood( const Point& point, float minDist, float cellSize )
 	{
-		GridPoint g = imageToGrid( point, cellSize );
+		const GridPoint g = imageToGrid( point, cellSize );
 
 		// number of adjucent cells to look for neighbour points
 		const int D = 5;
@@ -174,7 +165,7 @@ private:
 template <typename PRNG>
 Point popRandom( std::vector<Point>& points, PRNG& generator )
 {
-	const int idx = generator.randomInt( points.size()-1 );
+	const int idx = generator.randomInt( static_cast<int>(points.size())-1 );
 	const Point p = points[ idx ];
 	points.erase( points.begin() + idx );
 	return p;
