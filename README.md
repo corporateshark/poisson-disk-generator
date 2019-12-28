@@ -22,6 +22,12 @@ CMake:
 
 =============================
 
+Demo app usage:
+
+	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square]
+
+=============================
+
 Algorithm description can be found in "Fast Poisson Disk Sampling in Arbitrary Dimensions"
 http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
 
