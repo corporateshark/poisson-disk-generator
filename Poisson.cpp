@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.1.5
- * \date 16/06/2019
+ * \version 1.2.0
+ * \date 28/12/2019
  * \author Sergey Kosarevsky, 2014-2019
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -23,10 +23,12 @@
 #define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.h"
 
+#include "argh/argh.h"
+
 ///////////////// User selectable parameters ///////////////////////////////
 
-const int   NumPoints   = 20000;	// minimal number of points to generate
-const int   ImageSize   = 1024;	// generate RGB image [ImageSize x ImageSize]
+const int kNumPointsDefault = 20000; // minimal number of points to generate
+const int kImageSize        = 1024;  // generate RGB image [ImageSize x ImageSize]
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -122,9 +124,9 @@ void LoadDensityMap( const char* FileName )
 
 	std::cout << "Loaded ( " << W << " x " << H << " ) " << std::endl;
 
-	if ( W != ImageSize || H != ImageSize )
+	if ( W != kImageSize || H != kImageSize )
 	{
-		std::cout << "ERROR: density map should be " << ImageSize << " x " << ImageSize << std::endl;		
+		std::cout << "ERROR: density map should be " << kImageSize << " x " << kImageSize << std::endl;
 
 		exit( 255 );
 	}
@@ -146,10 +148,10 @@ void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
 	std::cout << "Version " << PoissonGenerator::Version << std::endl;
-	std::cout << "Sergey Kosarevsky, 2014-2016" << std::endl;
+	std::cout << "Sergey Kosarevsky, 2014-2019" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Usage: Poisson [density-map-rgb24.bmp]" << std::endl;
+	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square]" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -157,17 +159,27 @@ int main( int argc, char** argv )
 {
 	PrintBanner();
 
-	if ( argc > 1 )
+	argh::parser cmdl(argv);
+
+	if (!cmdl[1].empty())
 	{
-		LoadDensityMap( argv[1] );
+		LoadDensityMap(cmdl[1].c_str());
 	}
+
+	const bool cmdRawPointsOutput = cmdl[{"--raw-points"}];
+	const bool cmdSquare = cmdl[{"--square"}];
+
+	int NumPoints;
+	cmdl("num-points", kNumPointsDefault) >> NumPoints;
+
+	std::cout << "NumPoints = " << NumPoints << std::endl;
 
 	PoissonGenerator::DefaultPRNG PRNG;
 
-	const auto Points = PoissonGenerator::generatePoissonPoints( NumPoints, PRNG );
+	const auto Points = PoissonGenerator::generatePoissonPoints( NumPoints, PRNG, !cmdSquare );
 
 	// prepare BGR image
-	size_t DataSize = 3 * ImageSize * ImageSize;
+	size_t DataSize = 3 * kImageSize * kImageSize;
 
 	unsigned char* Img = new unsigned char[ DataSize ];
 
@@ -175,31 +187,41 @@ int main( int argc, char** argv )
 
 	for ( auto i = Points.begin(); i != Points.end(); i++ )
 	{
-		int x = int( i->x * ImageSize );
-		int y = int( i->y * ImageSize );
+		int x = int( i->x * kImageSize );
+		int y = int( i->y * kImageSize );
 		if ( g_DensityMap )
 		{
 			// dice
 			float R = PRNG.randomFloat();
-			float P = g_DensityMap[ x + y * ImageSize ];
+			float P = g_DensityMap[ x + y * kImageSize ];
 			if ( R > P ) continue;
 		}
-		int Base = 3 * (x + y * ImageSize);
+		int Base = 3 * (x + y * kImageSize);
 		Img[ Base+0 ] = Img[ Base+1 ] = Img[ Base+2 ] = 255;
 	}
 
-	SaveBMP( "Poisson.bmp", Img, ImageSize, ImageSize );
+	SaveBMP( "Poisson.bmp", Img, kImageSize, kImageSize );
 
 	delete[]( Img );
 
 	// dump points to a text file
 	std::ofstream File( "Poisson.txt", std::ios::out );	
 
-	File << "NumPoints = " << Points.size() << std::endl;
-
-	for ( const auto& p : Points )
+	if (cmdRawPointsOutput)
 	{
-		File << "X = " << p.x << "; Y = " << p.y << std::endl;
+		for (const auto& p : Points)
+		{
+			File << p.x << " " << p.y << std::endl;
+		}
+	}
+	else
+	{
+		File << "NumPoints = " << Points.size() << std::endl;
+
+		for (const auto& p : Points)
+		{
+			File << "X = " << p.x << "; Y = " << p.y << std::endl;
+		}
 	}
 
 	return 0;
