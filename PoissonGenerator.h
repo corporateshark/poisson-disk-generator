@@ -202,8 +202,8 @@ template <typename PRNG = DefaultPRNG>
 std::vector<Point> generatePoissonPoints(
 	size_t numPoints,
 	PRNG& generator,
-	int newPointsCount = 30,
 	bool isCircle = true,
+	int newPointsCount = 30,
 	float minDist = -1.0f
 )
 {
