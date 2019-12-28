@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.1.6
- * \date 07/12/2019
+ * \version 1.2.0
+ * \date 28/12/2019
  * \author Sergey Kosarevsky, 2014-2019
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -26,8 +26,9 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
-*		1.1.6   Dec  7, 2019		Removed duplicate seed initialization, fixed warnings
- *		1.1.5   Jun 16, 2019		In-class initializers, default ctors, naming, shorter code
+ *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
+ *		1.1.6   Dec  7, 2019		Removed duplicate seed initialization; fixed warnings
+ *		1.1.5   Jun 16, 2019		In-class initializers; default ctors; naming, shorter code
  *		1.1.4   Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
  *		1.1.3a  Jun  9, 2016		Update constructor for DefaultPRNG
  *		1.1.3   Mar 10, 2016		Header-only library, no global mutable state
@@ -235,12 +236,24 @@ std::vector<Point> generatePoissonPoints(
 	samplePoints.push_back( firstPoint );
 	grid.insert( firstPoint );
 
+#if POISSON_PROGRESS_INDICATOR
+	size_t progress = 0;
+#endif
+
 	// generate new points for each point in the queue
 	while ( !processList.empty() && samplePoints.size() < numPoints )
 	{
 #if POISSON_PROGRESS_INDICATOR
 		// a progress indicator, kind of
-		if ( samplePoints.size() % 100 == 0 ) std::cout << ".";
+		if ((samplePoints.size()) % 1000 == 0)
+		{
+			const size_t newProgress = 200 * (samplePoints.size() + processList.size()) / numPoints;
+			if (newProgress != progress)
+			{
+				progress = newProgress;
+				std::cout << ".";
+			}
+		}
 #endif // POISSON_PROGRESS_INDICATOR
 
 		const Point point = popRandom<PRNG>( processList, generator );
