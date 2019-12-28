@@ -207,6 +207,8 @@ std::vector<Point> generatePoissonPoints(
 	float minDist = -1.0f
 )
 {
+	numPoints *= 2;
+
 	if ( minDist < 0.0f )
 	{
 		minDist = sqrt( float(numPoints) ) / float(numPoints);
