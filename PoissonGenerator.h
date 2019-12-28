@@ -218,6 +218,8 @@ std::vector<Point> generatePoissonPoints(
 	std::vector<Point> samplePoints;
 	std::vector<Point> processList;
 
+	if (!numPoints) return samplePoints;
+
 	// create the grid
 	const float cellSize = minDist / sqrt( 2.0f );
 
