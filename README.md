@@ -1,6 +1,6 @@
 **Poisson Disk Points Generator**
 
-(C) Sergey Kosarevsky, 2014-2019
+(C) Sergey Kosarevsky, 2014-2021
 
 @corporateshark sk@linderdaum.com
 
