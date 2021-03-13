@@ -210,6 +210,10 @@ std::vector<Point> generatePoissonPoints(
 {
 	numPoints *= 2;
 
+	// if we want to generate a Poisson square shape, multiply the estimate number of points by PI/4 due to reduced shape area
+	if (!isCircle)
+		numPoints = static_cast<int>(M_PI_4 * numPoints);
+
 	if ( minDist < 0.0f )
 	{
 		minDist = sqrt( float(numPoints) ) / float(numPoints);
@@ -218,7 +222,8 @@ std::vector<Point> generatePoissonPoints(
 	std::vector<Point> samplePoints;
 	std::vector<Point> processList;
 
-	if (!numPoints) return samplePoints;
+	if (!numPoints)
+		return samplePoints;
 
 	// create the grid
 	const float cellSize = minDist / sqrt( 2.0f );
@@ -243,7 +248,7 @@ std::vector<Point> generatePoissonPoints(
 #endif
 
 	// generate new points for each point in the queue
-	while ( !processList.empty() && samplePoints.size() < numPoints )
+	while ( !processList.empty() && samplePoints.size() <= numPoints )
 	{
 #if POISSON_PROGRESS_INDICATOR
 		// a progress indicator, kind of
