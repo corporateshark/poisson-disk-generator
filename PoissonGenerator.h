@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.2.0
- * \date 28/12/2019
- * \author Sergey Kosarevsky, 2014-2019
+ * \version 1.3.0
+ * \date 14/03/2021
+ * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -26,6 +26,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+ *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
  *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
  *		1.1.6   Dec  7, 2019		Removed duplicate seed initialization; fixed warnings
  *		1.1.5   Jun 16, 2019		In-class initializers; default ctors; naming, shorter code
@@ -45,7 +46,7 @@
 namespace PoissonGenerator
 {
 
-const char* Version = "1.2.0 (28/12/2019)";
+const char* Version = "1.3.0 (14/03/2021)";
 
 class DefaultPRNG
 {
@@ -140,15 +141,16 @@ struct Grid
 		const int D = 5;
 
 		// scan the neighbourhood of the point in the grid
-		for ( int i = g.x - D; i < g.x + D; i++ )
+		for ( int i = g.x - D; i <= g.x + D; i++ )
 		{
-			for ( int j = g.y - D; j < g.y + D; j++ )
+			for ( int j = g.y - D; j <= g.y + D; j++ )
 			{
 				if ( i >= 0 && i < w_ && j >= 0 && j < h_ )
 				{
 					const Point P = grid_[ i ][ j ];
 
-					if ( P.valid_ && getDistance( P, point ) < minDist ) { return true; }
+					if ( P.valid_ && getDistance( P, point ) < minDist )
+						return true;
 				}
 			}
 		}

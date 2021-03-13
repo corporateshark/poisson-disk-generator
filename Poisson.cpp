@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.2.0
+ * \version 1.3.0
  * \date 28/12/2019
- * \author Sergey Kosarevsky, 2014-2019
+ * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -106,7 +106,7 @@ unsigned char* LoadBMP( const char* FileName, int* OutWidth, int* OutHeight )
 	*OutWidth  = Header.biWidth;
 	*OutHeight = Header.biHeight;
 
-	size_t DataSize = 3 * Header.biWidth * Header.biHeight;
+	const size_t DataSize = 3 * Header.biWidth * Header.biHeight;
 
 	unsigned char* Img = new unsigned char[ DataSize ];
 
@@ -148,7 +148,7 @@ void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
 	std::cout << "Version " << PoissonGenerator::Version << std::endl;
-	std::cout << "Sergey Kosarevsky, 2014-2019" << std::endl;
+	std::cout << "Sergey Kosarevsky, 2014-2021" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square]" << std::endl;
