@@ -214,7 +214,10 @@ std::vector<Point> generatePoissonPoints(
 
 	// if we want to generate a Poisson square shape, multiply the estimate number of points by PI/4 due to reduced shape area
 	if (!isCircle)
-		numPoints = static_cast<int>(M_PI_4 * numPoints);
+	{
+		const double Pi_4 = 0.785398163397448309616; // PI/4
+		numPoints = static_cast<int>(Pi_4 * numPoints);
+	}
 
 	if ( minDist < 0.0f )
 	{
