@@ -209,6 +209,8 @@ int main( int argc, char** argv )
 
 	if (cmdRawPointsOutput)
 	{
+		File << "NumPoints = " << Points.size() << std::endl;
+
 		for (const auto& p : Points)
 		{
 			File << p.x << " " << p.y << std::endl;
@@ -216,12 +218,13 @@ int main( int argc, char** argv )
 	}
 	else
 	{
-		File << "NumPoints = " << Points.size() << std::endl;
-
+		File << "const vec2 poissonPoints[" << Points.size() << "]" << std::endl;
+		File << "{" << std::endl;
 		for (const auto& p : Points)
 		{
-			File << "X = " << p.x << "; Y = " << p.y << std::endl;
+			File << "\tvec2(" << p.x << "f, " << p.y << "f)," << std::endl;
 		}
+		File << "};" << std::endl;
 	}
 
 	return 0;
