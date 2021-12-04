@@ -1,11 +1,11 @@
-/**
+﻿/**
  * \file PoissonGenerator.h
  * \brief
  *
  * Poisson Disk Points Generator
  *
- * \version 1.3.0
- * \date 14/03/2021
+ * \version 1.4.0
+ * \date 05/12/2021
  * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -17,7 +17,9 @@
 		#include "PoissonGenerator.h"
 		...
 		PoissonGenerator::DefaultPRNG PRNG;
-		const auto Points = PoissonGenerator::GeneratePoissonPoints( NumPoints, PRNG );
+		const auto Points = PoissonGenerator::generatePoissonPoints( NumPoints, PRNG );
+		...
+		const auto Points = PoissonGenerator::generateVogelPoints( NumPoints );
 */
 
 // Fast Poisson Disk Sampling in Arbitrary Dimensions
@@ -26,6 +28,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+ *    1.4     Dec  5, 2021    Added generateVogelPoints() to generate Vogel disk points
  *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
  *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
  *		1.1.6   Dec  7, 2019		Removed duplicate seed initialization; fixed warnings
@@ -94,6 +97,12 @@ struct Point
 		const float fx = x - 0.5f;
 		const float fy = y - 0.5f;
 		return ( fx*fx + fy*fy ) <= 0.25f;
+	}
+	Point& operator + (const Point& p)
+	{
+		x += p.x;
+		y += p.y;
+		return *this;
 	}
 };
 
@@ -203,10 +212,10 @@ Point generateRandomPointAround( const Point& p, float minDist, PRNG& generator 
 **/
 template <typename PRNG = DefaultPRNG>
 std::vector<Point> generatePoissonPoints(
-	size_t numPoints,
+	uint32_t numPoints,
 	PRNG& generator,
 	bool isCircle = true,
-	int newPointsCount = 30,
+	uint32_t newPointsCount = 30,
 	float minDist = -1.0f
 )
 {
@@ -270,7 +279,7 @@ std::vector<Point> generatePoissonPoints(
 
 		const Point point = popRandom<PRNG>( processList, generator );
 
-		for ( int i = 0; i < newPointsCount; i++ )
+		for ( uint32_t i = 0; i < newPointsCount; i++ )
 		{
 			const Point newPoint = generateRandomPointAround( point, minDist, generator );
 			const bool canFitPoint = isCircle ? newPoint.isInCircle() : newPoint.isInRectangle();
@@ -288,6 +297,36 @@ std::vector<Point> generatePoissonPoints(
 #if POISSON_PROGRESS_INDICATOR
 	std::cout << std::endl << std::endl;
 #endif // POISSON_PROGRESS_INDICATOR
+
+	return samplePoints;
+}
+
+Point sampleVogelDisk(uint32_t idx, uint32_t numPoints, float phi)
+{
+	const float kGoldenAngle = 2.4f;
+
+	const float r = sqrtf(float(idx) + 0.5f) / sqrtf(float(numPoints));
+	const float theta = idx * kGoldenAngle + phi;
+
+	return Point(r * cosf(theta), r * sinf(theta));
+}
+
+/**
+	Return a vector of generated points
+**/
+std::vector<Point> generateVogelPoints(uint32_t numPoints, bool isCircle = true, float phi = 0.0f, Point center = Point(0.5f, 0.5f))
+{
+	std::vector<Point> samplePoints;
+
+	samplePoints.reserve(numPoints);
+
+	const uint32_t numSamples = isCircle ? 4 * numPoints : numPoints;
+
+	for (uint32_t i = 0; i != numPoints; i++)
+	{
+		const Point p = sampleVogelDisk(i, numSamples, phi * 3.141592653f / 180.0f) + center;
+		samplePoints.push_back(p);
+	}
 
 	return samplePoints;
 }

@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.3.0
- * \date 28/12/2019
+ * \version 1.4.0
+ * \date 05/12/2021
  * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -16,6 +16,7 @@
 */
 
 #include <vector>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <memory.h>
@@ -27,8 +28,9 @@
 
 ///////////////// User selectable parameters ///////////////////////////////
 
-const int kNumPointsDefault = 20000; // minimal number of points to generate
-const int kImageSize        = 1024;  // generate RGB image [ImageSize x ImageSize]
+const int kNumPointsDefaultPoisson = 20000; // default number of points to generate for Poisson disk
+const int kNumPointsDefaultVogel   = 2000;  // default number of points to generate for Vogel disk
+const int kImageSize               = 512;  // generate RGB image [ImageSize x ImageSize]
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +153,7 @@ void PrintBanner()
 	std::cout << "Sergey Kosarevsky, 2014-2021" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square]" << std::endl;
+	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk]" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -168,18 +170,21 @@ int main( int argc, char** argv )
 
 	const bool cmdRawPointsOutput = cmdl[{"--raw-points"}];
 	const bool cmdSquare = cmdl[{"--square"}];
+	const bool cmdVogelDisk = cmdl[{"--vogel-disk"}];
 
 	int NumPoints;
-	cmdl("num-points", kNumPointsDefault) >> NumPoints;
+	cmdl("num-points", cmdVogelDisk ? kNumPointsDefaultVogel : kNumPointsDefaultPoisson) >> NumPoints;
 
 	std::cout << "NumPoints = " << NumPoints << std::endl;
 
 	PoissonGenerator::DefaultPRNG PRNG;
 
-	const auto Points = PoissonGenerator::generatePoissonPoints( NumPoints, PRNG, !cmdSquare );
+	const auto Points = cmdVogelDisk ?
+		PoissonGenerator::generateVogelPoints(NumPoints) :
+		PoissonGenerator::generatePoissonPoints(NumPoints, PRNG, !cmdSquare);
 
 	// prepare BGR image
-	size_t DataSize = 3 * kImageSize * kImageSize;
+	const size_t DataSize = 3 * kImageSize * kImageSize;
 
 	unsigned char* Img = new unsigned char[ DataSize ];
 
@@ -189,6 +194,8 @@ int main( int argc, char** argv )
 	{
 		int x = int( i->x * kImageSize );
 		int y = int( i->y * kImageSize );
+		if (x < 0 || y < 0 || x >= kImageSize || y >= kImageSize)
+			continue;
 		if ( g_DensityMap )
 		{
 			// dice
@@ -205,7 +212,7 @@ int main( int argc, char** argv )
 	delete[]( Img );
 
 	// dump points to a text file
-	std::ofstream File( "Poisson.txt", std::ios::out );	
+	std::ofstream File(cmdVogelDisk ? "Vogel.txt" : "Poisson.txt", std::ios::out);
 
 	if (cmdRawPointsOutput)
 	{
@@ -218,8 +225,12 @@ int main( int argc, char** argv )
 	}
 	else
 	{
-		File << "const vec2 poissonPoints[" << Points.size() << "]" << std::endl;
+		if (cmdVogelDisk)
+			File << "const vec2 vogelPoints[" << Points.size() << "]" << std::endl;
+		else
+			File << "const vec2 poissonPoints[" << Points.size() << "]" << std::endl;
 		File << "{" << std::endl;
+		File << std::fixed << std::setprecision(6);
 		for (const auto& p : Points)
 		{
 			File << "\tvec2(" << p.x << "f, " << p.y << "f)," << std::endl;
