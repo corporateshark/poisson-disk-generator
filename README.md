@@ -12,21 +12,28 @@ http://blog.linderdaum.com
 
 Poisson disk & Vogel disk points generator in a single file header-only C++11 library.
 
-=============================
+Usage example:
+--------------
+```
+#define POISSON_PROGRESS_INDICATOR 1
+#include "PoissonGenerator.h"
+...
+PoissonGenerator::DefaultPRNG PRNG;
+const auto Points = PoissonGenerator::generatePoissonPoints( numPoints, PRNG );
+...
+const auto Points = PoissonGenerator::generateVogelPoints( numPoints );
+```
 
-To compile:
-	*gcc Poisson.cpp -std=c++11 -lstdc++*
+Build instructions:
+-----------
 
-CMake:
-	*cmake -G "Visual Studio 16 2019" -A x64*
+*gcc Poisson.cpp -std=c++11 -lstdc++*
 
-=============================
+*cmake -G "Visual Studio 16 2019" -A x64*
 
 Demo app usage:
-
+---------------
 	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk]
-
-=============================
 
 Algorithm description can be found in "Fast Poisson Disk Sampling in Arbitrary Dimensions"
 http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
