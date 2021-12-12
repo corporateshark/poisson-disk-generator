@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.4.0
- * \date 05/12/2021
+ * \version 1.4.1
+ * \date 12/12/2021
  * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -28,6 +28,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+ *		1.4.1   Dec 12, 2021		Replaced default Mersenne Twister and <random> with fast and lightweight LCG
  *		1.4     Dec  5, 2021		Added generateVogelPoints() to generate Vogel disk points
  *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
  *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
@@ -43,36 +44,32 @@
 */
 
 #include <vector>
-#include <random>
 #include <stdint.h>
 
 namespace PoissonGenerator
 {
 
-const char* Version = "1.3.0 (14/03/2021)";
+const char* Version = "1.4.1 (12/12/2021)";
 
 class DefaultPRNG
 {
 public:
 	DefaultPRNG() = default;
-	explicit DefaultPRNG( uint32_t seed )
-	: gen_( seed )
-	{}
-
-	float randomFloat()
+	explicit DefaultPRNG(unsigned int seed) :seed_(seed) {}
+	inline float randomFloat()
 	{
-		return static_cast<float>( dis_( gen_ ) );
+		seed_ *= 521167;
+		uint32_t a = (seed_ & 0x007fffff) | 0x40000000;
+		// remap to 0..1
+		return 0.5f * (*((float*)&a) - 2.0f);
 	}
-
-	int randomInt( int maxValue )
+	inline uint32_t randomInt(uint32_t maxInt)
 	{
-		std::uniform_int_distribution<> disInt( 0, maxValue );
-		return disInt( gen_ );
+		return uint32_t(randomFloat() * maxInt);
 	}
-
+	inline uint32_t getSeed() const { return seed_; }
 private:
-	std::mt19937 gen_ = std::mt19937( std::random_device()() );
-	std::uniform_real_distribution<float> dis_ = std::uniform_real_distribution<float>( 0.0f, 1.0f );
+	uint32_t seed_ = 7133167;
 };
 
 struct Point

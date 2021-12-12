@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.4.0
- * \date 05/12/2021
+ * \version 1.4.1
+ * \date 12/12/2021
  * \author Sergey Kosarevsky, 2014-2021
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
