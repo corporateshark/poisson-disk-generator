@@ -28,7 +28,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
- *    1.4     Dec  5, 2021    Added generateVogelPoints() to generate Vogel disk points
+ *		1.4     Dec  5, 2021		Added generateVogelPoints() to generate Vogel disk points
  *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
  *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
  *		1.1.6   Dec  7, 2019		Removed duplicate seed initialization; fixed warnings
