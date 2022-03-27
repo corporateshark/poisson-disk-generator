@@ -1,6 +1,6 @@
 **Poisson Disk Points Generator**
 
-(C) Sergey Kosarevsky, 2014-2021
+(C) Sergey Kosarevsky, 2014-2022
 
 @corporateshark sk@linderdaum.com
 
@@ -22,6 +22,8 @@ PoissonGenerator::DefaultPRNG PRNG;
 const auto Points = PoissonGenerator::generatePoissonPoints( numPoints, PRNG );
 ...
 const auto Points = PoissonGenerator::generateVogelPoints( numPoints );
+...
+const auto Points = PoissonGenerator::generateJitteredGridPoints( numPoints, PRNG );
 ```
 
 Build instructions:

@@ -4,15 +4,15 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.4.1
- * \date 12/12/2021
- * \author Sergey Kosarevsky, 2014-2021
+ * \version 1.5.0
+ * \date 26/03/2022
+ * \author Sergey Kosarevsky, 2014-2022
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
 /*
 	To compile:
-		gcc Poisson.cpp -std=c++11 -lstdc++
+		gcc Poisson.cpp -std=c++17 -lstdc++
 */
 
 #include <vector>
@@ -28,9 +28,10 @@
 
 ///////////////// User selectable parameters ///////////////////////////////
 
-const int kNumPointsDefaultPoisson = 20000; // default number of points to generate for Poisson disk
-const int kNumPointsDefaultVogel   = 2000;  // default number of points to generate for Vogel disk
-const int kImageSize               = 512;  // generate RGB image [ImageSize x ImageSize]
+const int kNumPointsDefaultPoisson  = 20000; // default number of points to generate for Poisson disk
+const int kNumPointsDefaultVogel    = 2000;  // default number of points to generate for Vogel disk
+const int kNumPointsDefaultJittered = 2500;  // default number of points to generate for jittered grid
+const int kImageSize                = 512;  // generate RGB image [ImageSize x ImageSize]
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -150,10 +151,10 @@ void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
 	std::cout << "Version " << PoissonGenerator::Version << std::endl;
-	std::cout << "Sergey Kosarevsky, 2014-2021" << std::endl;
+	std::cout << "Sergey Kosarevsky, 2014-2022" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk]" << std::endl;
+	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid]" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -171,17 +172,19 @@ int main( int argc, char** argv )
 	const bool cmdRawPointsOutput = cmdl[{"--raw-points"}];
 	const bool cmdSquare = cmdl[{"--square"}];
 	const bool cmdVogelDisk = cmdl[{"--vogel-disk"}];
+	const bool cmdJitteredGrid = cmdl[{"--jittered-grid"}];;
 
-	int NumPoints;
-	cmdl("num-points", cmdVogelDisk ? kNumPointsDefaultVogel : kNumPointsDefaultPoisson) >> NumPoints;
+	unsigned int numPoints;
+	cmdl("num-points", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson)) >> numPoints;
 
-	std::cout << "NumPoints = " << NumPoints << std::endl;
+	std::cout << "NumPoints = " << numPoints << std::endl;
 
 	PoissonGenerator::DefaultPRNG PRNG;
 
 	const auto Points = cmdVogelDisk ?
-		PoissonGenerator::generateVogelPoints(NumPoints) :
-		PoissonGenerator::generatePoissonPoints(NumPoints, PRNG, !cmdSquare);
+		PoissonGenerator::generateVogelPoints(numPoints) : cmdJitteredGrid ?
+		PoissonGenerator::generateJitteredGridPoints(numPoints, PRNG, !cmdSquare) :
+		PoissonGenerator::generatePoissonPoints(numPoints, PRNG, !cmdSquare);
 
 	// prepare BGR image
 	const size_t DataSize = 3 * kImageSize * kImageSize;

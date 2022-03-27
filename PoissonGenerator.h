@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.4.1
- * \date 12/12/2021
- * \author Sergey Kosarevsky, 2014-2021
+ * \version 1.5.0
+ * \date 26/03/2022
+ * \author Sergey Kosarevsky, 2014-2022
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -28,6 +28,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+ *		1.5     Mar 26, 2022    Added generateJitteredGridPoints() to generate jittered grid points
  *		1.4.1   Dec 12, 2021		Replaced default Mersenne Twister and <random> with fast and lightweight LCG
  *		1.4     Dec  5, 2021		Added generateVogelPoints() to generate Vogel disk points
  *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
@@ -99,6 +100,12 @@ struct Point
 	{
 		x += p.x;
 		y += p.y;
+		return *this;
+	}
+	Point& operator - (const Point& p)
+	{
+		x -= p.x;
+		y -= p.y;
 		return *this;
 	}
 };
@@ -323,6 +330,45 @@ std::vector<Point> generateVogelPoints(uint32_t numPoints, bool isCircle = true,
 	{
 		const Point p = sampleVogelDisk(i, numSamples, phi * 3.141592653f / 180.0f) + center;
 		samplePoints.push_back(p);
+	}
+
+	return samplePoints;
+}
+
+/**
+	Return a vector of generated points
+**/
+template <typename PRNG = DefaultPRNG>
+std::vector<Point> generateJitteredGridPoints(
+	uint32_t numPoints,
+	PRNG& generator,
+	bool isCircle = false,
+	float jitterRadius = 0.004f,
+	Point center = Point(0.5f, 0.5f)
+)
+{
+	std::vector<Point> samplePoints;
+
+	samplePoints.reserve(numPoints);
+
+	const uint32_t gridSize = uint32_t(sqrt(numPoints));
+
+	for (uint32_t x = 0; x != gridSize; x++)
+	{
+		for (uint32_t y = 0; y != gridSize; y++)
+		{
+			Point p;
+			do {
+				const Point offs = generateRandomPointAround(Point(0, 0), jitterRadius, generator) - center + Point(0.5f, 0.5f);
+				p = Point(float(x) / gridSize, float(y) / gridSize) + offs;
+				// generate a new point until it is within the boundaries
+			} while (!p.isInRectangle());
+
+			if (isCircle)
+				if (!p.isInCircle()) continue;
+
+			samplePoints.push_back(p);
+		}
 	}
 
 	return samplePoints;
