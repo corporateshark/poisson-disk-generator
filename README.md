@@ -29,13 +29,13 @@ const auto Points = PoissonGenerator::generateJitteredGridPoints( numPoints, PRN
 Build instructions:
 -----------
 
-*gcc Poisson.cpp -std=c++11 -lstdc++*
+Linux/OSX: ```gcc Poisson.cpp -std=c++17 -lstdc++```
 
-*cmake -G "Visual Studio 16 2019" -A x64*
+Windows: ```cmake -G "Visual Studio 17 2022" -A x64```
 
 Demo app usage:
 ---------------
-	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk]
+	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid]
 
 Algorithm description can be found in "Fast Poisson Disk Sampling in Arbitrary Dimensions"
 http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
@@ -59,3 +59,7 @@ Poisson rectangle with custom density map
 Vogel disk
 
 ![Vogel disk](https://user-images.githubusercontent.com/2510143/144725686-59f31ade-8ddf-4461-9e18-eda0a7cd3146.png)
+
+Jittered grid
+
+![image](https://user-images.githubusercontent.com/2510143/160268633-365a802b-ded1-40ea-bfef-23d02d6803e4.png)
