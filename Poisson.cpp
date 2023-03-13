@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.5.0
- * \date 26/03/2022
- * \author Sergey Kosarevsky, 2014-2022
+ * \version 1.5.1
+ * \date 13/03/2023
+ * \author Sergey Kosarevsky, 2014-2023
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <math.h>
 #include <memory.h>
 
 #define POISSON_PROGRESS_INDICATOR 1
