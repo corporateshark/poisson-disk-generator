@@ -4,8 +4,8 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.5.1
- * \date 13/03/2023
+ * \version 1.6.0
+ * \date 29/05/2023
  * \author Sergey Kosarevsky, 2014-2023
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
@@ -152,10 +152,10 @@ void PrintBanner()
 {
 	std::cout << "Poisson disk points generator" << std::endl;
 	std::cout << "Version " << PoissonGenerator::Version << std::endl;
-	std::cout << "Sergey Kosarevsky, 2014-2022" << std::endl;
+	std::cout << "Sergey Kosarevsky, 2014-2023" << std::endl;
 	std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid]" << std::endl;
+	std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid | --hammersley]" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -174,6 +174,7 @@ int main( int argc, char** argv )
 	const bool cmdSquare = cmdl[{"--square"}];
 	const bool cmdVogelDisk = cmdl[{"--vogel-disk"}];
 	const bool cmdJitteredGrid = cmdl[{"--jittered-grid"}];;
+	const bool cmdHammersley = cmdl[{"--hammersley"}];;
 
 	unsigned int numPoints;
 	cmdl("num-points", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson)) >> numPoints;
@@ -184,7 +185,8 @@ int main( int argc, char** argv )
 
 	const auto Points = cmdVogelDisk ?
 		PoissonGenerator::generateVogelPoints(numPoints) : cmdJitteredGrid ?
-		PoissonGenerator::generateJitteredGridPoints(numPoints, PRNG, !cmdSquare) :
+		PoissonGenerator::generateJitteredGridPoints(numPoints, PRNG, !cmdSquare) : cmdHammersley ?
+		PoissonGenerator::generateHammersleyPoints(numPoints) :
 		PoissonGenerator::generatePoissonPoints(numPoints, PRNG, !cmdSquare);
 
 	// prepare BGR image
@@ -211,12 +213,12 @@ int main( int argc, char** argv )
 		Img[ Base+0 ] = Img[ Base+1 ] = Img[ Base+2 ] = 255;
 	}
 
-	SaveBMP( "Poisson.bmp", Img, kImageSize, kImageSize );
+	SaveBMP( "Points.bmp", Img, kImageSize, kImageSize );
 
 	delete[]( Img );
 
 	// dump points to a text file
-	std::ofstream File(cmdVogelDisk ? "Vogel.txt" : "Poisson.txt", std::ios::out);
+	std::ofstream File("points.txt", std::ios::out);
 
 	if (cmdRawPointsOutput)
 	{
@@ -229,10 +231,7 @@ int main( int argc, char** argv )
 	}
 	else
 	{
-		if (cmdVogelDisk)
-			File << "const vec2 vogelPoints[" << Points.size() << "]" << std::endl;
-		else
-			File << "const vec2 poissonPoints[" << Points.size() << "]" << std::endl;
+		File << "const vec2 points[" << Points.size() << "]" << std::endl;
 		File << "{" << std::endl;
 		File << std::fixed << std::setprecision(6);
 		for (const auto& p : Points)
