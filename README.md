@@ -24,6 +24,8 @@ const auto Points = PoissonGenerator::generatePoissonPoints( numPoints, PRNG );
 const auto Points = PoissonGenerator::generateVogelPoints( numPoints );
 ...
 const auto Points = PoissonGenerator::generateJitteredGridPoints( numPoints, PRNG );
+...
+const auto Points = PoissonGenerator::generateHammersleyPoints( numPoints );
 ```
 
 Build instructions:
@@ -63,3 +65,7 @@ Vogel disk
 Jittered grid
 
 ![image](https://user-images.githubusercontent.com/2510143/160268633-365a802b-ded1-40ea-bfef-23d02d6803e4.png)
+
+Hammersley points
+
+![Points](https://github.com/corporateshark/poisson-disk-generator/assets/2510143/086f26ad-0c42-4c80-92a9-ab74374034f3)
