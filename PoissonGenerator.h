@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.5.0
- * \date 26/03/2022
- * \author Sergey Kosarevsky, 2014-2022
+ * \version 1.6.0
+ * \date 29/05/2023
+ * \author Sergey Kosarevsky, 2014-2023
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -371,6 +371,48 @@ std::vector<Point> generateJitteredGridPoints(
 		}
 	}
 
+	return samplePoints;
+}
+
+namespace {
+
+// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+float radicalInverse_VdC(uint32_t bits)
+{
+	bits = (bits << 16u) | (bits >> 16u);
+	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+	bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+	bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+	bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+	return float(float(bits) * 2.3283064365386963e-10); // / 0x100000000
+}
+
+Point hammersley2d(uint32_t i, uint32_t N)
+{
+	return Point(float(i)/float(N), radicalInverse_VdC(i));
+}
+
+} // namespace
+
+/**
+	Return a vector of generated points
+**/
+std::vector<Point> generateHammersleyPoints(
+	uint32_t numPoints
+)
+{
+	std::vector<Point> samplePoints;
+
+	samplePoints.reserve(numPoints);
+
+	const uint32_t gridSize = uint32_t(sqrt(numPoints));
+
+	for (uint32_t i = 0; i != numPoints; i++)
+	{
+		Point p = hammersley2d(i, numPoints);
+
+		samplePoints.push_back(p);
+	}
 	return samplePoints;
 }
 
