@@ -48,24 +48,24 @@ Implementation is based on http://devmag.org.za/2009/05/03/poisson-disk-sampling
 
 Poisson disk
 
-![Poisson disk](https://camo.githubusercontent.com/d2c51f5ef0b0644378910f2c58e3e29c3e297ab7/687474703a2f2f626c6f672e6c696e6465726461756d2e636f6d2f696d616765732f506f6973736f6e5f4469736b2e706e67)
+![Poisson disk](.github/1_Poisson_disk.png)
 
 Poisson rectangle
 
-![Poisson rectange](https://camo.githubusercontent.com/bfd11990fb6d6050d372fc251c2a161344016175/687474703a2f2f626c6f672e6c696e6465726461756d2e636f6d2f696d616765732f506f6973736f6e5f526563742e706e67)
+![Poisson rectange](.github/2_Poisson_rect.png)
 
 Poisson rectangle with custom density map
 
-![Poisson rectangle with custom density map](https://camo.githubusercontent.com/82a7c564779471147872bfd35ee0c246b11eb8c3/687474703a2f2f626c6f672e6c696e6465726461756d2e636f6d2f696d616765732f506f6973736f6e5f526563745f44656e736974792e706e67)
+![Poisson rectangle with custom density map](.github/3_Poisson_density.png)
 
 Vogel disk
 
-![Vogel disk](https://user-images.githubusercontent.com/2510143/144725686-59f31ade-8ddf-4461-9e18-eda0a7cd3146.png)
+![Vogel disk](.github/4_Vogel_disk.png)
 
 Jittered grid
 
-![image](https://user-images.githubusercontent.com/2510143/160268633-365a802b-ded1-40ea-bfef-23d02d6803e4.png)
+![image](.github/5_Jittered_grid.png)
 
 Hammersley points
 
-![Points](https://github.com/corporateshark/poisson-disk-generator/assets/2510143/086f26ad-0c42-4c80-92a9-ab74374034f3)
+![Points](.github/6_Hammersley.png)
