@@ -8,6 +8,8 @@
  * \date 02/08/2025
  * \author Sergey Kosarevsky, 2014-2025
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
+ *
+ * https://github.com/corporateshark/poisson-disk-generator
  */
 
 /*
