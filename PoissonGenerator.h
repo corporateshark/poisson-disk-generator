@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator
  *
- * \version 1.6.1
- * \date 16/02/2024
- * \author Sergey Kosarevsky, 2014-2024
+ * \version 1.6.2
+ * \date 02/08/2025
+ * \author Sergey Kosarevsky, 2014-2025
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -28,6 +28,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
+*		1.6.2   Aug  8, 2025    Dropped the `argh` library dependency
  *		1.6.1   Feb 16, 2024    Reformatted using .clang-format
  *		1.6     May 29, 2023    Added generateHammersleyPoints() to generate Hammersley points
  *		1.5     Mar 26, 2022    Added generateJitteredGridPoints() to generate jittered grid points
@@ -51,7 +52,7 @@
 
 namespace PoissonGenerator {
 
-const char* Version = "1.6.1 (16/02/2024)";
+const char* Version = "1.6.2 (02/08/2025)";
 
 class DefaultPRNG {
  public:

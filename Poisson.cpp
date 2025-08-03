@@ -4,9 +4,9 @@
  *
  * Poisson Disk Points Generator example
  *
- * \version 1.6.1
- * \date 16/02/2024
- * \author Sergey Kosarevsky, 2014-2024
+ * \version 1.6.2
+ * \date 02/08/2025
+ * \author Sergey Kosarevsky, 2014-2025
  * \author support@linderdaum.com   http://www.linderdaum.com   http://blog.linderdaum.com
  */
 
@@ -24,8 +24,6 @@
 
 #define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.h"
-
-#include "argh/argh.h"
 
 ///////////////// User selectable parameters ///////////////////////////////
 
@@ -144,7 +142,7 @@ void LoadDensityMap(const char* FileName) {
 void PrintBanner() {
   std::cout << "Poisson disk points generator" << std::endl;
   std::cout << "Version " << PoissonGenerator::Version << std::endl;
-  std::cout << "Sergey Kosarevsky, 2014-2023" << std::endl;
+  std::cout << "Sergey Kosarevsky, 2014-2025" << std::endl;
   std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
   std::cout << std::endl;
   std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid | "
@@ -156,23 +154,38 @@ void PrintBanner() {
 int main(int argc, char** argv) {
   PrintBanner();
 
-  argh::parser cmdl(argv);
-
-  if (!cmdl[1].empty()) {
-    LoadDensityMap(cmdl[1].c_str());
+  if (argc > 1 && !strstr(argv[1], "--")) {
+    LoadDensityMap(argv[1]);
   }
 
-  const bool cmdRawPointsOutput = cmdl[{"--raw-points"}];
-  const bool cmdSquare = cmdl[{"--square"}];
-  const bool cmdVogelDisk = cmdl[{"--vogel-disk"}];
-  const bool cmdJitteredGrid = cmdl[{"--jittered-grid"}];
-  ;
-  const bool cmdHammersley = cmdl[{"--hammersley"}];
-  ;
+  auto hasCmdLineArg = [argc, argv](const char* arg) -> bool {
+    for (int i = 1; i < argc; i++) {
+      if (!strcmp(argv[i], arg)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-  unsigned int numPoints;
-  cmdl("num-points", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson)) >>
-      numPoints;
+  auto getCmdLineValue = [argc, argv](const char* arg, unsigned int default) -> unsigned {
+    for (int i = 1; i < argc; i++) {
+      if (strstr(argv[i], arg)) {
+        unsigned int v = default;
+        return sscanf(argv[i], "--num-points=%u", &v) == 1 ? v : default;
+      }
+    }
+    return default;
+  };
+
+  const bool cmdRawPointsOutput = hasCmdLineArg("--raw-points");
+  const bool cmdSquare = hasCmdLineArg("--square");
+  const bool cmdVogelDisk = hasCmdLineArg("--vogel-disk");
+  const bool cmdJitteredGrid = hasCmdLineArg("--jittered-grid");
+
+  const bool cmdHammersley = hasCmdLineArg("--hammersley");
+
+  const unsigned int numPoints = getCmdLineValue(
+      "--num-points=", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson));
 
   std::cout << "NumPoints = " << numPoints << std::endl;
 
