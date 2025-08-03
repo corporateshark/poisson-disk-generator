@@ -30,23 +30,23 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
-*		1.6.2   Aug  8, 2025    Dropped the `argh` library dependency
- *		1.6.1   Feb 16, 2024    Reformatted using .clang-format
- *		1.6     May 29, 2023    Added generateHammersleyPoints() to generate Hammersley points
- *		1.5     Mar 26, 2022    Added generateJitteredGridPoints() to generate jittered grid points
- *		1.4.1   Dec 12, 2021		Replaced default Mersenne Twister and <random> with fast and lightweight LCG
- *		1.4     Dec  5, 2021		Added generateVogelPoints() to generate Vogel disk points
- *		1.3     Mar 14, 2021		Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
- *		1.2     Dec 28, 2019		Bugfixes; more consistent progress indicator; new command line options in demo app
- *		1.1.6   Dec  7, 2019		Removed duplicate seed initialization; fixed warnings
- *		1.1.5   Jun 16, 2019		In-class initializers; default ctors; naming, shorter code
- *		1.1.4   Oct 19, 2016		POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
- *		1.1.3a  Jun  9, 2016		Update constructor for DefaultPRNG
- *		1.1.3   Mar 10, 2016		Header-only library, no global mutable state
- *		1.1.2   Apr  9, 2015		Output a text file with XY coordinates
- *		1.1.1   May 23, 2014		Initialize PRNG seed, fixed uninitialized fields
- *		1.1     May  7, 2014		Support of density maps
- *		1.0     May  6, 2014
+ *    1.6.2   Aug  8, 2025    Dropped the `argh` library dependency
+ *    1.6.1   Feb 16, 2024    Reformatted using .clang-format
+ *    1.6     May 29, 2023    Added generateHammersleyPoints() to generate Hammersley points
+ *    1.5     Mar 26, 2022    Added generateJitteredGridPoints() to generate jittered grid points
+ *    1.4.1   Dec 12, 2021    Replaced default Mersenne Twister and <random> with fast and lightweight LCG
+ *    1.4     Dec  5, 2021    Added generateVogelPoints() to generate Vogel disk points
+ *    1.3     Mar 14, 2021    Bugfixes: number of points in the !isCircle mode, incorrect loop boundaries
+ *    1.2     Dec 28, 2019    Bugfixes; more consistent progress indicator; new command line options in demo app
+ *    1.1.6   Dec  7, 2019    Removed duplicate seed initialization; fixed warnings
+ *    1.1.5   Jun 16, 2019    In-class initializers; default ctors; naming, shorter code
+ *    1.1.4   Oct 19, 2016    POISSON_PROGRESS_INDICATOR can be defined outside of the header file, disabled by default
+ *    1.1.3a  Jun  9, 2016    Update constructor for DefaultPRNG
+ *    1.1.3   Mar 10, 2016    Header-only library, no global mutable state
+ *    1.1.2   Apr  9, 2015    Output a text file with XY coordinates
+ *    1.1.1   May 23, 2014    Initialize PRNG seed, fixed uninitialized fields
+ *    1.1     May  7, 2014    Support of density maps
+ *    1.0     May  6, 2014
  */
 
 #include <stdint.h>
