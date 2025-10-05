@@ -146,7 +146,7 @@ void PrintBanner() {
   std::cout << "support@linderdaum.com http://www.linderdaum.com http://blog.linderdaum.com" << std::endl;
   std::cout << std::endl;
   std::cout << "Usage: Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid | "
-               "--hammersley]"
+               "--hammersley] [--shuffle] [--save-frames]"
             << std::endl;
   std::cout << std::endl;
 }
@@ -185,6 +185,7 @@ int main(int argc, char** argv) {
   const bool cmdHammersley = hasCmdLineArg("--hammersley");
 
   const bool cmdShuffle = hasCmdLineArg("--shuffle");
+  const bool cmdSaveFrames = hasCmdLineArg("--save-frames");
 
   const unsigned int numPoints = getCmdLineValue(
       "--num-points=", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson));
@@ -209,6 +210,8 @@ int main(int argc, char** argv) {
     PoissonGenerator::shuffle(Points, PRNG);
   }
 
+  int frame = 0;
+
   for (const auto& i : Points) {
     const int x = int(i.x * kImageSize);
     const int y = int(i.y * kImageSize);
@@ -221,8 +224,14 @@ int main(int argc, char** argv) {
       if (R > P)
         continue;
     }
-    int Base = 3 * (x + y * kImageSize);
+    const int Base = 3 * (x + y * kImageSize);
     Img[Base + 0] = Img[Base + 1] = Img[Base + 2] = 255;
+
+    if (cmdSaveFrames) {
+      char fileName[64] = {};
+      snprintf(fileName, sizeof(fileName), "pnt%05i.bmp", frame++);
+      SaveBMP(fileName, Img, kImageSize, kImageSize);
+    }
   }
 
   SaveBMP("Points.bmp", Img, kImageSize, kImageSize);
