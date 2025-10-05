@@ -134,7 +134,7 @@ struct Grid {
   bool isInNeighbourhood(const Point& point, float minDist, float cellSize) {
     const GridPoint g = imageToGrid(point, cellSize);
 
-    // number of adjucent cells to look for neighbour points
+    // number of adjacent cells to look for neighbour points
     const int D = 5;
 
     // scan the neighbourhood of the point in the grid
