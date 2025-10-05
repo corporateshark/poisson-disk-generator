@@ -372,4 +372,15 @@ std::vector<Point> generateHammersleyPoints(uint32_t numPoints) {
   return samplePoints;
 }
 
+template<typename PRNG = DefaultPRNG>
+void shuffle(std::vector<Point>& points, PRNG& generator) {
+  const int length = (int)points.size();
+  if (!length)
+    return;
+  // Fisher-Yates shuffle
+  for (int i = length - 1; i-- > 0;) {
+    std::swap(points[i], points[generator.randomInt(i)]);
+  }
+}
+
 } // namespace PoissonGenerator

@@ -184,6 +184,8 @@ int main(int argc, char** argv) {
 
   const bool cmdHammersley = hasCmdLineArg("--hammersley");
 
+  const bool cmdShuffle = hasCmdLineArg("--shuffle");
+
   const unsigned int numPoints = getCmdLineValue(
       "--num-points=", cmdVogelDisk ? kNumPointsDefaultVogel : (cmdJitteredGrid ? kNumPointsDefaultJittered : kNumPointsDefaultPoisson));
 
@@ -191,10 +193,10 @@ int main(int argc, char** argv) {
 
   PoissonGenerator::DefaultPRNG PRNG;
 
-  const auto Points = cmdVogelDisk      ? PoissonGenerator::generateVogelPoints(numPoints)
-                      : cmdJitteredGrid ? PoissonGenerator::generateJitteredGridPoints(numPoints, PRNG, !cmdSquare)
-                      : cmdHammersley   ? PoissonGenerator::generateHammersleyPoints(numPoints)
-                                        : PoissonGenerator::generatePoissonPoints(numPoints, PRNG, !cmdSquare);
+  auto Points = cmdVogelDisk      ? PoissonGenerator::generateVogelPoints(numPoints)
+                : cmdJitteredGrid ? PoissonGenerator::generateJitteredGridPoints(numPoints, PRNG, !cmdSquare)
+                : cmdHammersley   ? PoissonGenerator::generateHammersleyPoints(numPoints)
+                                  : PoissonGenerator::generatePoissonPoints(numPoints, PRNG, !cmdSquare);
 
   // prepare BGR image
   const size_t DataSize = 3 * kImageSize * kImageSize;
@@ -203,9 +205,13 @@ int main(int argc, char** argv) {
 
   memset(Img, 0, DataSize);
 
-  for (auto i = Points.begin(); i != Points.end(); i++) {
-    int x = int(i->x * kImageSize);
-    int y = int(i->y * kImageSize);
+  if (cmdShuffle) {
+    PoissonGenerator::shuffle(Points, PRNG);
+  }
+
+  for (const auto& i : Points) {
+    const int x = int(i.x * kImageSize);
+    const int y = int(i.y * kImageSize);
     if (x < 0 || y < 0 || x >= kImageSize || y >= kImageSize)
       continue;
     if (g_DensityMap) {
