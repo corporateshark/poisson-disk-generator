@@ -15,11 +15,13 @@
       gcc Poisson.cpp -std=c++17 -lstdc++
 */
 
+#include <math.h>
+#include <memory.h>
+#include <string.h>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <math.h>
-#include <memory.h>
 #include <vector>
 
 #define POISSON_PROGRESS_INDICATOR 1
@@ -167,14 +169,14 @@ int main(int argc, char** argv) {
     return false;
   };
 
-  auto getCmdLineValue = [argc, argv](const char* arg, unsigned int default) -> unsigned {
+  auto getCmdLineValue = [argc, argv](const char* arg, unsigned int defaultValue) -> unsigned int {
     for (int i = 1; i < argc; i++) {
       if (strstr(argv[i], arg)) {
-        unsigned int v = default;
-        return sscanf(argv[i], "--num-points=%u", &v) == 1 ? v : default;
+        unsigned int v = defaultValue;
+        return sscanf(argv[i], "--num-points=%u", &v) == 1 ? v : defaultValue;
       }
     }
-    return default;
+    return defaultValue;
   };
 
   const bool cmdRawPointsOutput = hasCmdLineArg("--raw-points");
