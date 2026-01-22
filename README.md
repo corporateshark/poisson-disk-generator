@@ -37,7 +37,7 @@ Windows: ```cmake -G "Visual Studio 17 2022" -A x64```
 
 Demo app usage:
 ---------------
-	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--square] [--vogel-disk | --jittered-grid]
+	Poisson [density-map-rgb24.bmp] [--raw-points] [--num-points=<value>] [--shuffle] [--save-frames] [--save-video[=<skip-frames>]] [--save-frames] [--square] [--vogel-disk | --jittered-grid]
 
 Algorithm description can be found in "Fast Poisson Disk Sampling in Arbitrary Dimensions"
 http://people.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf

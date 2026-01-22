@@ -30,7 +30,7 @@
 // Implementation based on http://devmag.org.za/2009/05/03/poisson-disk-sampling/
 
 /* Versions history:
- *    1.7     Jan 21, 2026    New arguments: `--shuffle` and `--save-frames`; fixed warnings
+ *    1.7     Jan 21, 2026    New arguments: `--shuffle`, `--save-frames`, and `--save-video`; fixed warnings
  *    1.6.2   Aug  8, 2025    Dropped the `argh` library dependency
  *    1.6.1   Feb 16, 2024    Reformatted using .clang-format
  *    1.6     May 29, 2023    Added generateHammersleyPoints() to generate Hammersley points
